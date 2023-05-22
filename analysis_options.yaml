@@ -21,7 +21,6 @@ linter:
     - avoid_private_typedef_functions
     - combinators_ordering
     - curly_braces_in_flow_control_structures
-    - lowercase_with_underscores
     - omit_local_variable_types
     - annotate_overrides
     - sort_constructors_first
