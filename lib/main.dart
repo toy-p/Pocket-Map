@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'package:my_tiny_map/screen/home_screen.dart';
+import 'package:my_tiny_map/config/route.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,9 +14,9 @@ void main() async {
     },
   );
   runApp(
-    const MaterialApp(
+    MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(), //ChangeLocation(),
+      routes: nameRoutes,
     ),
   );
 }

@@ -16,6 +16,7 @@ dependencies:
   intl: ^0.18.1
   flutter_speed_dial: ^6.2.0
   image_picker: ^0.8.7+5
+  flutter_native_splash: ^2.3.1
 
 dev_dependencies:
   flutter_test:
@@ -28,6 +29,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/splash/
 
   # fonts:
   #   - family: Schyler
