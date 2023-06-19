@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'package:my_tiny_map/config/route.dart';
-import 'package:my_tiny_map/utils/show_memory.dart';
+import 'package:my_tiny_map/utils/add_memory.dart';
+import 'package:my_tiny_map/utils/show_all_memory.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -51,9 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
         heroTag: heroTag,
         onPressed: () {
           if (val == 0.0) {
-            Navigator.pushNamed(context, RouteName.addLocation);
+            dialogBuilder(context);
           } else if (val == 0.2) {
-            showBottom(context);
+            bottomSheetBuilder(context);
+            // showBottom(context); // 해당 위치 마커 추억 보기
           }
         },
         backgroundColor: Colors.white,

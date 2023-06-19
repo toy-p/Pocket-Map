@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:my_tiny_map/config/route.dart';
 import 'package:my_tiny_map/datas/models/image_model.dart';
-
 import 'package:my_tiny_map/utils/date.dart';
 
 final List<ImgItemModel> _item = [
@@ -247,8 +247,8 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
                             fontWeight: FontWeight.bold),
                       ),
                       onTap: () {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
+                        Navigator.popUntil(
+                            context, ModalRoute.withName(RouteName.home));
                       },
                     ),
                     InkWell(
