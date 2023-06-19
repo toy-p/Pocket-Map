@@ -7,7 +7,6 @@ void main() async {
   await NaverMapSdk.instance.initialize(
     clientId: '', // 자신의 Client id
     onAuthFailed: (ex) {
-      print('sdsd');
       print("********* 네이버맵 인증오류 : $ex *********");
       // 401 - 잘못된 클라이언트 ID 지정, 잘못된 클라이언트 유형을 사용, 콘솔에 등록된 앱 패키지 이름과 미일치
       // 429 - 콘솔에서 Maps 서비스를 선택하지 않음, 사용 한도 초과
