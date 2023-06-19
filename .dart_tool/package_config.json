@@ -272,6 +272,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "nested",
+      "rootUri": "file:///Users/hyojuseo/.pub-cache/hosted/pub.dev/nested-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "path",
       "rootUri": "file:///Users/hyojuseo/.pub-cache/hosted/pub.dev/path-1.8.3",
       "packageUri": "lib/",
@@ -342,6 +348,12 @@
       "rootUri": "file:///Users/hyojuseo/.pub-cache/hosted/pub.dev/process-4.2.4",
       "packageUri": "lib/",
       "languageVersion": "2.14"
+    },
+    {
+      "name": "provider",
+      "rootUri": "file:///Users/hyojuseo/.pub-cache/hosted/pub.dev/provider-6.0.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "sky_engine",
@@ -434,7 +446,7 @@
       "languageVersion": "2.19"
     }
   ],
-  "generated": "2023-06-19T06:28:14.973975Z",
+  "generated": "2023-06-19T07:56:23.668109Z",
   "generator": "pub",
   "generatorVersion": "3.0.3"
 }

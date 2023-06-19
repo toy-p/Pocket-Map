@@ -1,5 +1,5 @@
+import 'package:my_tiny_map/pages/home_page.dart';
 import 'package:my_tiny_map/screens/add_location_screen.dart';
-import 'package:my_tiny_map/screens/home_screen.dart';
 
 class RouteName {
   static const home = '/';
@@ -7,6 +7,6 @@ class RouteName {
 }
 
 var nameRoutes = {
-  RouteName.home: (context) => const HomeScreen(),
+  RouteName.home: (context) => const HomePage(),
   RouteName.addLocation: (context) => const AddLocationScreen(),
 };
