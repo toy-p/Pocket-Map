@@ -37,142 +37,149 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
       });
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: InkWell(
-            borderRadius: BorderRadius.circular(50),
-            onTap: () {
-              popUp(context);
-            },
-            child: const Icon(Icons.keyboard_backspace_outlined,
-                color: Colors.black54)),
-        centerTitle: true,
-        title: const Text('추억 남기기',
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white54,
-        elevation: 0.0,
-        actions: [
-          TextButton(
-            onPressed: () {
-              debugPrint(textController.text);
-            },
-            style: ButtonStyle(
-              foregroundColor: const MaterialStatePropertyAll(Colors.white54),
-              overlayColor: MaterialStateColor.resolveWith(
-                  (states) => Colors.grey.shade200),
-              shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(40.0)))),
+    return GestureDetector(
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          leading: InkWell(
+              borderRadius: BorderRadius.circular(50),
+              onTap: () {
+                popUp(context);
+              },
+              child: const Icon(Icons.keyboard_backspace_outlined,
+                  color: Colors.black54)),
+          centerTitle: true,
+          title: const Text('추억 남기기',
+              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          backgroundColor: Colors.white54,
+          elevation: 0.0,
+          actions: [
+            TextButton(
+              onPressed: () {
+                debugPrint(textController.text);
+              },
+              style: ButtonStyle(
+                foregroundColor: const MaterialStatePropertyAll(Colors.white54),
+                overlayColor: MaterialStateColor.resolveWith(
+                    (states) => Colors.grey.shade200),
+                shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(40.0)))),
+              ),
+              child: Text('저장',
+                  style: TextStyle(
+                      color: Colors.yellow.shade700,
+                      fontWeight: FontWeight.bold)),
             ),
-            child: Text('저장',
-                style: TextStyle(
-                    color: Colors.yellow.shade700,
-                    fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-      floatingActionButton: SpeedDial(
-        heroTag: 'menu',
-        backgroundColor: Colors.white54,
-        icon: Icons.add,
-        iconTheme: const IconThemeData(color: Colors.black),
-        activeIcon: Icons.close,
-        elevation: 130,
-        spacing: 3,
-        direction: SpeedDialDirection.up,
-        useRotationAnimation: true,
-        //true이면 close버튼을 눌러야만 close할 수 있음.
-        closeManually: false,
-        animationDuration: const Duration(milliseconds: 500),
-        spaceBetweenChildren: 9.0,
-        children: [
-          SpeedDialChild(
-            child: const Icon(Icons.camera_alt_outlined),
-            onTap: () {
-              getImage(ImageSource.camera);
-            },
-            //label: '카메라',
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.photo_library_outlined),
-            onTap: () {
-              getImage(ImageSource.gallery);
-            },
-            //label: '갤러리',
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 30.0),
-            child: SizedBox(
-                height: 60,
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('장소', style: TextStyle(fontSize: 15)),
-                            SizedBox(height: 10),
-                            Text('방문 일자', style: TextStyle(fontSize: 15)),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            const Text('인하대학교 경영대학',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                )),
-                            const SizedBox(height: 10),
-                            Text(getToday(),
-                                style: const TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ],
-                    )
-                  ],
-                )),
-          ),
-          // 노트 입력
-          Expanded(
-              child: Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-            child: Container(
-                decoration: const BoxDecoration(
-                    color: Color(0xFFFFF59D),
-                    borderRadius: BorderRadius.all(Radius.circular(15))),
+          ],
+        ),
+        floatingActionButton: SpeedDial(
+          heroTag: 'menu',
+          backgroundColor: Colors.white54,
+          icon: Icons.add,
+          iconTheme: const IconThemeData(color: Colors.black),
+          activeIcon: Icons.close,
+          elevation: 130,
+          spacing: 3,
+          direction: SpeedDialDirection.up,
+          useRotationAnimation: true,
+          //true이면 close버튼을 눌러야만 close할 수 있음.
+          closeManually: false,
+          animationDuration: const Duration(milliseconds: 500),
+          spaceBetweenChildren: 9.0,
+          children: [
+            SpeedDialChild(
+              child: const Icon(Icons.camera_alt_outlined),
+              onTap: () {
+                getImage(ImageSource.camera);
+              },
+              //label: '카메라',
+            ),
+            SpeedDialChild(
+              child: const Icon(Icons.photo_library_outlined),
+              onTap: () {
+                getImage(ImageSource.gallery);
+              },
+              //label: '갤러리',
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 30.0),
+              child: SizedBox(
+                  height: 60,
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('장소', style: TextStyle(fontSize: 15)),
+                              SizedBox(height: 10),
+                              Text('방문 일자', style: TextStyle(fontSize: 15)),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              const Text('인하대학교 경영대학',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  )),
+                              const SizedBox(height: 10),
+                              Text(getToday(),
+                                  style: const TextStyle(
+                                      fontSize: 18, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ],
+                      )
+                    ],
+                  )),
+            ),
+            // 노트 입력
+            Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-                  child: TextField(
-                    controller: textController,
-                    keyboardType: TextInputType.text,
-                    showCursor: true,
-                    maxLines: null,
-                    autofocus: true,
-                    cursorColor: Colors.grey,
-                    decoration: const InputDecoration(
-                      enabledBorder: InputBorder.none,
-                      border: InputBorder.none,
-                      hintText: '추억을 남겨보세요.',
+              padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
+              child: Container(
+                  decoration: const BoxDecoration(
+                      color: Color(0xFFFFF59D),
+                      borderRadius: BorderRadius.all(Radius.circular(15))),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
+
+                      child: TextField(
+                        controller: textController,
+                        keyboardType: TextInputType.text,
+                        showCursor: true,
+                        maxLines: null,
+                        autofocus: false,
+                        cursorColor: Colors.grey,
+                        decoration: const InputDecoration(
+                          enabledBorder: InputBorder.none,
+                          border: InputBorder.none,
+                          hintText: '추억을 남겨보세요.',
+                        ),
                     ),
-                  ),
-                )),
-          )),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 1, 20, 0),
-            child: Divider(thickness: 1, color: Colors.grey),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-            child: showImage(),
-          )
-        ],
+                  )),
+            )),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 1, 20, 0),
+              child: Divider(thickness: 1, color: Colors.grey),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
+              child: showImage(),
+            )
+          ],
+        ),
       ),
     );
   }
