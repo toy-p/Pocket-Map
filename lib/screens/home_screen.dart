@@ -15,6 +15,18 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     print('테스트용~~');
+
+    // 네이버 지도 초기 설정
+    const NaverMapViewOptions(
+      initialCameraPosition: NCameraPosition(
+        target: NLatLng(107, 114),
+        zoom: 1,
+        bearing: 0,
+        tilt: 0,
+      ),
+      locationButtonEnable: true,
+      mapType: NMapType.navi,
+    );
   }
 
   @override
@@ -72,9 +84,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget mainMap() {
     return NaverMap(
-      options: const NaverMapViewOptions(),
+      options: const NaverMapViewOptions(locationButtonEnable: true),
       onMapReady: (controller) {
-        print('네이버맵 로딩 완료!');
+
+        //* 아직 미완성 부분 * (테스트 중) //
+
+        var marker = NMarker(
+          id: 'test',
+          position: const NLatLng(37.506932467450326, 127.05578661133796),
+        );
+
+        controller.addOverlay(marker); // 지도에 마커 추가
+
+        var onMarkerInfoWindow =
+            NInfoWindow.onMarker(id: marker.info.id, text: '인포윈도우 텍스트');
+
+        marker.openInfoWindow(onMarkerInfoWindow); // 마커에 내용 추가
       },
     );
   }
