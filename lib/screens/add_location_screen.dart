@@ -10,8 +10,8 @@ import 'package:my_tiny_map/utils/date.dart';
 final List<ImgItemModel> _item = [
   ImgItemModel('assets/images/image1.png', 'image1'),
   ImgItemModel('assets/images/image2.png', 'image2'),
-  ImgItemModel('assets/images/image1.png', 'image1'),
-  ImgItemModel('assets/images/image2.png', 'image2'),
+  ImgItemModel('assets/images/image3.png', 'image3'),
+  ImgItemModel('assets/images/image4.png', 'image4'),
 ];
 
 class AddLocationScreen extends StatefulWidget {
@@ -60,6 +60,8 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
             TextButton(
               onPressed: () {
                 debugPrint(textController.text);
+                FocusScope.of(context).unfocus();
+                savePopUp(context);
               },
               style: ButtonStyle(
                 foregroundColor: const MaterialStatePropertyAll(Colors.white54),
@@ -184,7 +186,7 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
   }
 
   Widget showImage() {
-    var widthCount = MediaQuery.of(context).size.width / 153.3;
+    var widthCount = (MediaQuery.of(context).size.width-20) / 180;
     if (_image != null) {
       return Container(
         alignment: const AlignmentDirectional(0.0, 0.0),
@@ -210,11 +212,16 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child:
-                      Image.asset(_item[index].image, width: 128, height: 128),
+                      Image.asset(
+                          _item[index].image,
+                          width: (MediaQuery.of(context).size.width - ((widthCount-1)*20))/widthCount,
+                          height: (MediaQuery.of(context).size.width - ((widthCount-1)*20))/widthCount,
+                          fit:BoxFit.contain
+                      ),
                 ),
                 GestureDetector(
                     onTap: () => deletePopUp(context),
-                    child: const Icon(Icons.delete_outline_outlined))
+                    child: const Icon(Icons.delete_outline_outlined,size: 30,weight: 20,))
               ],
             );
           }),
@@ -266,7 +273,6 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
                       ),
                       onTap: () {
                         Navigator.pop(context);
-                        Navigator.pop(context);
                       },
                     ),
                   ],
@@ -308,6 +314,7 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
                             fontWeight: FontWeight.bold),
                       ),
                       onTap: () {
+                        debugPrint(MediaQuery.of(context).size.width.toString());
                         Navigator.pop(context);
                       },
                     ),
@@ -319,6 +326,61 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
                             fontWeight: FontWeight.bold),
                       ),
                       onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void savePopUp(context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          title: const Text(
+            '저장하시겠습니까?',
+            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w800),
+          ),
+          content: SizedBox(
+            height: 95,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('작성중인 내용을 임시 저장하거나'),
+                const Text('계속 수정할 수 있습니다.'),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    InkWell(
+                      child: Text(
+                        '계속 수정',
+                        style: TextStyle(
+                            color: Colors.deepOrange.shade300,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    InkWell(
+                      child: Text(
+                        '저장',
+                        style: TextStyle(
+                            color: Colors.deepOrange.shade300,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
                         Navigator.pop(context);
                       },
                     ),
