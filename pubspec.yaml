@@ -12,12 +12,15 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
-  flutter_naver_map: ^1.0.2
+  
+  kakao_map_plugin:
   intl: ^0.18.1
   flutter_speed_dial: ^6.2.0
   image_picker: ^0.8.7+5
   flutter_native_splash: ^2.3.1
   provider: ^6.0.5
+  geolocator: ^9.0.2
+  kpostal: ^0.5.1
   
 
 dev_dependencies:
@@ -29,9 +32,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  assets:
-    - assets/images/
-    - assets/splash/
+  # assets:
 
   # fonts:
   #   - family: Schyler
