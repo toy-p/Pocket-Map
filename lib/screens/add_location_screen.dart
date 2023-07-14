@@ -29,14 +29,6 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Future getImage(ImageSource imageSource) async {
-      var pickedFile = await picker.pickImage(source: imageSource);
-
-      setState(() {
-        _image = File(pickedFile!.path);
-      });
-    }
-
     return GestureDetector(
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();
@@ -53,7 +45,8 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
                   color: Colors.black54)),
           centerTitle: true,
           title: const Text('추억 남기기',
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
           backgroundColor: Colors.white54,
           elevation: 0.0,
           actions: [
@@ -87,20 +80,18 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
           useRotationAnimation: true,
           //true이면 close버튼을 눌러야만 close할 수 있음.
           closeManually: false,
-          animationDuration: const Duration(milliseconds: 500),
+          //animationDuration: const Duration(milliseconds: 500), // 윈도우에서 에러가 나서 주석처리 하였습니닷
           spaceBetweenChildren: 9.0,
           children: [
             SpeedDialChild(
               child: const Icon(Icons.camera_alt_outlined),
-              onTap: () {
-                getImage(ImageSource.camera);
-              },
+              onTap: () {},
               //label: '카메라',
             ),
             SpeedDialChild(
               child: const Icon(Icons.photo_library_outlined),
               onTap: () {
-                getImage(ImageSource.gallery);
+                Navigator.pushNamed(context, '/selectImage');
               },
               //label: '갤러리',
             ),
@@ -136,7 +127,8 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
                               const SizedBox(height: 10),
                               Text(getToday(),
                                   style: const TextStyle(
-                                      fontSize: 18, fontWeight: FontWeight.bold)),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ],
