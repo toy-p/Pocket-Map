@@ -43,6 +43,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /android/app/src/main/kotlin
+pubspec.lock
 
 .env
 coverage
