@@ -89,7 +89,7 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
           useRotationAnimation: true,
           //true이면 close버튼을 눌러야만 close할 수 있음.
           closeManually: false,
-          animationDuration: const Duration(milliseconds: 500),
+          //animationDuration: const Duration(milliseconds: 500), // 윈도우에서 에러가 나서 주석처리 하였습니닷
           spaceBetweenChildren: 9.0,
           children: [
             SpeedDialChild(
@@ -102,7 +102,7 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
             SpeedDialChild(
               child: const Icon(Icons.photo_library_outlined),
               onTap: () {
-                getImage(ImageSource.gallery);
+                Navigator.pushNamed(context, '/selectImage');
               },
               //label: '갤러리',
             ),
