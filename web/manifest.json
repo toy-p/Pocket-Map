@@ -1,6 +1,6 @@
 {
-    "name": "my_tiny_map",
-    "short_name": "my_tiny_map",
+    "name": "pocket_map_main",
+    "short_name": "pocket_map_main",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
