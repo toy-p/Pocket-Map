@@ -99,6 +99,7 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
               },
               //label: '카메라',
             ),
+            //
             SpeedDialChild(
               child: const Icon(Icons.photo_library_outlined),
               onTap: () {
