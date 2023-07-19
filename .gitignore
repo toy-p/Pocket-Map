@@ -46,3 +46,5 @@ app.*.map.json
 
 .env
 coverage
+ios/Runner.xcworkspace/contents.xcworkspacedata
+ios/Runner.xcodeproj/project.pbxproj
