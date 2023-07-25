@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,10 +21,82 @@ class AddLocationScreen extends StatefulWidget {
 }
 
 class _AddLocationScreenState extends State<AddLocationScreen> {
+  final ImagePicker _picker = ImagePicker();
+  final List<XFile?> _pickedImages = [];
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
-  File? _image;
-  final picker = ImagePicker();
   TextEditingController textController = TextEditingController();
+
+  void popUp(context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          title: const Text(
+            '정말 나가시겠어요?',
+            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w800),
+          ),
+          content: SizedBox(
+            height: 95,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('작성중인 내용을 임시 저장하거나'),
+                const Text('계속 수정할 수 있습니다.'),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    InkWell(
+                      child: Text(
+                        '나가기',
+                        style: TextStyle(
+                            color: Colors.deepOrange.shade300,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      onTap: () {
+                        Navigator.popUntil(
+                            context, ModalRoute.withName(RouteName.home));
+                      },
+                    ),
+                    InkWell(
+                      child: Text(
+                        '계속 수정',
+                        style: TextStyle(
+                            color: Colors.deepOrange.shade300,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void getImage(ImageSource source) async {
+    var image = await _picker.pickImage(source: source);
+
+    setState(() {
+      _pickedImages.add(image);
+    });
+  }
+
+  void getMultiImage() async {
+    var images = await _picker.pickMultiImage();
+
+    setState(() {
+      _pickedImages.addAll(images);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,14 +156,12 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
           children: [
             SpeedDialChild(
               child: const Icon(Icons.camera_alt_outlined),
-              onTap: () {},
+              onTap: () => getImage(ImageSource.camera),
               //label: '카메라',
             ),
             SpeedDialChild(
               child: const Icon(Icons.photo_library_outlined),
-              onTap: () {
-                Navigator.pushNamed(context, '/selectImage');
-              },
+              onTap: () => getMultiImage(),
               //label: '갤러리',
             ),
           ],
@@ -165,19 +234,46 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
               padding: EdgeInsets.fromLTRB(20, 1, 20, 0),
               child: Divider(thickness: 1, color: Colors.grey),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-              child: showImage(),
-            )
+            Expanded(child: showImage()),
           ],
         ),
       ),
     );
   }
 
+  Widget _gridPhotoItem(XFile e) {
+    return Padding(
+      padding: const EdgeInsets.all(2.0),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.file(
+              File(e.path),
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned(
+            top: 5,
+            right: 5,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _pickedImages.remove(e);
+                });
+              },
+              child: const Icon(
+                Icons.cancel_rounded,
+                color: Colors.black87,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   Widget showImage() {
-    var widthCount = MediaQuery.of(context).size.width / 153.3;
-    if (_image != null) {
+    if (_pickedImages.isEmpty) {
       return Container(
         alignment: const AlignmentDirectional(0.0, 0.0),
         height: 200,
@@ -191,136 +287,20 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
         ),
       );
     } else {
-      return SizedBox(
-        height: 200,
-        child: GridView.count(
-          crossAxisCount: widthCount.toInt(),
-          scrollDirection: Axis.vertical,
-          children: List.generate(_item.length, (index) {
-            return Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child:
-                      Image.asset(_item[index].image, width: 128, height: 128),
-                ),
-                GestureDetector(
-                    onTap: () => deletePopUp(context),
-                    child: const Icon(Icons.delete_outline_outlined))
-              ],
-            );
-          }),
-        ),
-      );
+      return Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          child: GridView.builder(
+            scrollDirection: Axis.vertical,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 10, //수평 Padding
+              crossAxisSpacing: 10,
+            ),
+            itemCount: _pickedImages.length,
+            itemBuilder: (context, index) {
+              return _gridPhotoItem(_pickedImages[index]!);
+            },
+          ));
     }
-  }
-
-  void popUp(context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-          title: const Text(
-            '정말 나가시겠어요?',
-            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w800),
-          ),
-          content: SizedBox(
-            height: 95,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('작성중인 내용을 임시 저장하거나'),
-                const Text('계속 수정할 수 있습니다.'),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    InkWell(
-                      child: Text(
-                        '나가기',
-                        style: TextStyle(
-                            color: Colors.deepOrange.shade300,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      onTap: () {
-                        Navigator.popUntil(
-                            context, ModalRoute.withName(RouteName.home));
-                      },
-                    ),
-                    InkWell(
-                      child: Text(
-                        '계속 수정',
-                        style: TextStyle(
-                            color: Colors.deepOrange.shade300,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void deletePopUp(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-          title: const Text(
-            '이미지 삭제',
-            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w800),
-          ),
-          content: SizedBox(
-            height: 70,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('삭제 하시겠습니까?'),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    InkWell(
-                      child: Text(
-                        '취소',
-                        style: TextStyle(
-                            color: Colors.deepOrange.shade300,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    InkWell(
-                      child: Text(
-                        '삭제',
-                        style: TextStyle(
-                            color: Colors.deepOrange.shade300,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 }
