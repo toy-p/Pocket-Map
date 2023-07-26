@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Stack(
         children: [
-          map(),
+          map(context),
           const AddressSearch(),
         ],
       ),

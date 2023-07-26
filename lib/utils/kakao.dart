@@ -4,11 +4,15 @@ import 'package:kakao_map_plugin/kakao_map_plugin.dart';
 
 late KakaoMapController mapController;
 
-KakaoMap map() {
+KakaoMap map(context) {
   return KakaoMap(
-    onMapCreated: (controller) {
+    onMapCreated: (controller) async {
       mapController = controller;
     },
+    onMarkerTap: ((markerId, latLng, zoomLevel) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('마커의 위도와 경도는 :\n\n$latLng')));
+    }),
   );
 }
 
@@ -22,18 +26,5 @@ void getLocation() async {
   mapController.setCenter(LatLng(position.latitude, position.longitude));
   print(
     '현재 위도 : ${position.latitude} & 경도 : ${position.longitude}',
-  );
-}
-
-Widget circleDot() {
-  return Center(
-    child: Container(
-      height: 25,
-      width: 25,
-      decoration: BoxDecoration(
-        color: Colors.blue[500],
-        borderRadius: BorderRadius.circular(50),
-      ),
-    ),
   );
 }
