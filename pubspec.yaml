@@ -21,6 +21,9 @@ dependencies:
   geolocator: ^9.0.2
   kpostal: ^0.5.1
   kakao_map_plugin:
+  sqflite: ^2.2.8+4
+  path: ^1.8.3
+  gallery_saver: ^2.3.2
   
 
 dev_dependencies:
