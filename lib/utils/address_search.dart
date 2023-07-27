@@ -13,6 +13,8 @@ class AddressSearch extends StatefulWidget {
 
 class _AddressSearchState extends State<AddressSearch> {
   GetLocation getL = GetLocation();
+  late Marker marker;
+  Set<Marker> markers = {};
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +23,7 @@ class _AddressSearchState extends State<AddressSearch> {
       left: 15,
       right: 15,
       child: GestureDetector(
-        onTap: () {
+        onTap: () async {
           onTap();
           moveLocation();
         },
@@ -91,6 +93,8 @@ class _AddressSearchState extends State<AddressSearch> {
               getL.longitude = result.longitude.toString();
               getL.init_latitude = double.parse(getL.latitude);
               getL.init_longitude = double.parse(getL.longitude);
+              print(
+                  '검색된 위도 : ${getL.init_latitude} & 경도 : ${getL.init_longitude}');
             });
           },
         ),
@@ -101,8 +105,22 @@ class _AddressSearchState extends State<AddressSearch> {
   Future moveLocation() async {
     // 딜레이가 없으면 검색된 위도,경도의 값이 반영되지 않아 검색 후 딜레이를 주어서 반영되게 함
     await Future.delayed(const Duration(milliseconds: 12000), () {
-      print('검색된 위도 : ${getL.init_latitude} & 경도 : ${getL.init_longitude}');
       mapController.setCenter(LatLng(getL.init_latitude, getL.init_longitude));
+
+      // 검색 후 마커 찍음
+      marker = Marker(
+        markerId: markers.length.toString(),
+        latLng: LatLng(getL.init_latitude, getL.init_longitude),
+        width: 30,
+        height: 44,
+        offsetX: 15,
+        offsetY: 44,
+        // markerImageSrc: 'https://w7.pngwing.com/pngs/96/889/png-transparent-marker-map-interesting-places-the-location-on-the-map-the-location-of-the-thumbnail.png',
+      );
+
+      markers.add(marker);
+
+      mapController.addMarker(markers: markers.toList());
     });
   }
 }
