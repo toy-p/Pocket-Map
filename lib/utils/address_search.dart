@@ -4,6 +4,8 @@ import 'package:kpostal/kpostal.dart';
 import 'package:my_tiny_map/datas/models/kakaomap_model.dart';
 import 'package:my_tiny_map/utils/kakao.dart';
 
+import '../db_repository/sql_marker_CRUD.dart';
+
 class AddressSearch extends StatefulWidget {
   const AddressSearch({super.key});
 
@@ -94,7 +96,7 @@ class _AddressSearchState extends State<AddressSearch> {
               getL.init_latitude = double.parse(getL.latitude);
               getL.init_longitude = double.parse(getL.longitude);
               print(
-                  '검색된 위도 : ${getL.init_latitude} & 경도 : ${getL.init_longitude}');
+                  '검색된 위치 : ${getL.roadAddress} 검색된 위도 : ${getL.init_latitude} & 경도 : ${getL.init_longitude}');
             });
           },
         ),
@@ -116,8 +118,10 @@ class _AddressSearchState extends State<AddressSearch> {
         offsetX: 15,
         offsetY: 44,
         // markerImageSrc: 'https://w7.pngwing.com/pngs/96/889/png-transparent-marker-map-interesting-places-the-location-on-the-map-the-location-of-the-thumbnail.png',
-      );
-
+      );/*
+      double _a = double.parse(getL.init_latitude.toStringAsFixed(6));
+      double _b = double.parse(getL.init_longitude.toStringAsFixed(6));
+      SqlMarkerCRUD().insert(getL.roadAddress,_a,_b);*/
       markers.add(marker);
 
       mapController.addMarker(markers: markers.toList());
