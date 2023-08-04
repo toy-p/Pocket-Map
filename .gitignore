@@ -43,6 +43,8 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+pubspec.yaml
+pubspec.lock
 .env
 coverage
 macos/Flutter/GeneratedPluginRegistrant.swift
