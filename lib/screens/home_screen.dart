@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
         heroTag: heroTag,
         onPressed: () {
           if (val == 0.0) {
-            getLocation();
+            getLocation(context);
           } else if (val == 0.2) {
             dialogBuilder(context);
             // showBottom(context); // 해당 위치 마커 추억 보기
