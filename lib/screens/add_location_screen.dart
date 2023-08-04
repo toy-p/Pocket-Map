@@ -5,13 +5,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:my_tiny_map/config/route.dart';
 import 'package:my_tiny_map/datas/models/image_model.dart';
 import 'package:my_tiny_map/utils/date.dart';
+import 'package:my_tiny_map/db_model/picture.dart';
+import 'package:my_tiny_map/db_repository/sql_database.dart';
+import 'package:my_tiny_map/db_repository/sql_picture_CRUD.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 
-final List<ImgItemModel> _item = [
-  ImgItemModel('assets/images/image1.png', 'image1'),
-  ImgItemModel('assets/images/image2.png', 'image2'),
-  ImgItemModel('assets/images/image1.png', 'image1'),
-  ImgItemModel('assets/images/image2.png', 'image2'),
-];
+import '../db_model/image_utility/utility.dart';
 
 class AddLocationScreen extends StatefulWidget {
   const AddLocationScreen({super.key});
@@ -82,20 +81,40 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
     );
   }
 
+  //카메라 촬영 결과 저장
   void getImage(ImageSource source) async {
-    var image = await _picker.pickImage(source: source);
-
-    setState(() {
-      _pickedImages.add(image);
+    String firstButtonText;
+    await _picker.pickImage(source: source).then((XFile? recorededImage){
+      if(recorededImage!=null && recorededImage.path!=null) {
+        setState(() {
+          firstButtonText='saving in progress..';
+        });
+        GallerySaver.saveImage(recorededImage.path).then((bool? success){
+          setState(() {
+            _pickedImages.add(recorededImage);
+          });
+        });
+      }
     });
   }
 
   void getMultiImage() async {
     var images = await _picker.pickMultiImage();
 
+    //image를 string으로 변환 & sql에 저장까지.
+    for(int i=0;i<images.length;i++) {
+      String imgString = Utility.base64String(await images[i].readAsBytes());
+      Picture picture1 = new Picture(
+        marker_idx: 0, //마커 index
+        memory_idx: 0, //메모리 index
+        picture: imgString,
+      );
+      await SqlPictureCRUD().insert(picture1);
+    }
+    /*
     setState(() {
       _pickedImages.addAll(images);
-    });
+    });*/
   }
 
   @override
@@ -297,7 +316,11 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
               crossAxisSpacing: 10,
             ),
             itemCount: _pickedImages.length,
+            //_pickedImages를 음............어떻게 처리해야하지
+            //marker를 눌럿을때 위도와 경도 받아와서, marker index를 받아내고..
+            //marker index를 이용해서 memory index들을 list로 받아와서, 추억에 따라 나오게 해야함.
             itemBuilder: (context, index) {
+              //picture.idx가 primary key이므로.. picture.idx를 통해 delete를 해준다.
               return _gridPhotoItem(_pickedImages[index]!);
             },
           ));
