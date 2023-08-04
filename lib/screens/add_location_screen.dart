@@ -262,7 +262,6 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
                         SqlPictureCRUD().deleteMemoryPicture(Provider.of<MarkerSelected>(context,listen:false).memory_idx);
                         Navigator.pop(context);
                         Navigator.pop(context);
-                        Navigator.pop(context);
                       },
                     ),
                     InkWell(
