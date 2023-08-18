@@ -1,326 +1,360 @@
-  import 'package:flutter/material.dart';
-import 'package:kakao_map_plugin/kakao_map_plugin.dart';
+import 'package:flutter/material.dart';
+import 'package:my_tiny_map/db_model/marker_model.dart';
+import 'package:my_tiny_map/db_model/memory_model.dart';
+import 'package:my_tiny_map/db_model/picture_model.dart';
+import 'package:my_tiny_map/screens/addmemory_screen.dart';
+import 'package:my_tiny_map/screens/editMemory_screen.dart';
+import 'package:my_tiny_map/utils/edit_marker.dart';
+import 'package:my_tiny_map/utils/image_utility/utility.dart';
+import 'package:my_tiny_map/utils/showAlertDialog.dart';
+import 'package:my_tiny_map/view_model/marker_provider.dart';
+import 'package:my_tiny_map/view_model/memory_provider.dart';
+import 'package:my_tiny_map/view_model/picture_provider.dart';
+import 'package:my_tiny_map/view_model/selectedMarker_provider.dart';
+import 'package:my_tiny_map/view_model/selelctedMemoryProvider.dart';
 import 'package:provider/provider.dart';
 
-import '../config/route.dart';
-import '../db_model/image_utility/utility.dart';
-import '../db_model/information.dart';
-import '../db_model/memory_model.dart';
-import '../db_repository/sql_marker_CRUD.dart';
-import '../db_repository/sql_memory_CRUD.dart';
-import '../db_repository/sql_picture_CRUD.dart';
-import '../screens/edit_location_screen.dart';
-import '../screens/add_location_screen.dart';
-import 'date.dart';
+Future showBottom(int markerId, context) {
+  return showModalBottomSheet(
+    isScrollControlled: true,
+    showDragHandle: true,
+    backgroundColor: Colors.white,
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+    ),
+    builder: (context) {
+      return BottomSheetWidget(markerId: markerId);
+    },
+  );
+}
 
-Future showBottom(context){
-    return showModalBottomSheet(
-      isScrollControlled: true,
-      showDragHandle: true,
-      backgroundColor: Colors.white,
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder:(context, bottomState) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height * 0.65,
-              child: Stack(
+class BottomSheetWidget extends StatefulWidget {
+  const BottomSheetWidget({super.key, required this.markerId});
+  final int markerId;
+
+  @override
+  _BottomSheetState createState() => _BottomSheetState();
+}
+
+class _BottomSheetState extends State<BottomSheetWidget> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData(context);
+    });
+  }
+
+  Future<void> _loadData(BuildContext context) async {
+    await Future.delayed(const Duration(milliseconds: 1));
+
+    var selectedMarkerProvider =
+        Provider.of<SelectedMarkerProvider>(context, listen: false);
+    await selectedMarkerProvider.setInfo(
+        Provider.of<MarkerProvider>(context, listen: false)
+            .searchMarker(widget.markerId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var selectedMarkerProvider = Provider.of<SelectedMarkerProvider>(context);
+
+    if (selectedMarkerProvider.isLoading ||
+        selectedMarkerProvider.marker == null) {
+      return const Center(child: CircularProgressIndicator());
+    } else {
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.65,
+        child: Stack(children: [
+          Column(
+            children: [
+              _header(context, selectedMarkerProvider.marker!),
+              const SizedBox(height: 15),
+              const Divider(thickness: 1, color: Colors.grey),
+              _body(context, selectedMarkerProvider.memories),
+            ],
+          ),
+          Positioned(
+              right: 16.0,
+              bottom: 16.0,
+              child: FloatingActionButton(
+                backgroundColor: Colors.white,
+                onPressed: () async {
+                  await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AddMemoryScreen()));
+                },
+                child: Image.asset(
+                  'assets/images/map_icon.png',
+                ),
+              )),
+        ]),
+      );
+    }
+  }
+}
+
+Widget _header(context, MarkerModel marker) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              '추억 보기',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            InkWell(
+              onTap: () {
+                //여기가 마커
+                _showDialogMarker(context);
+              },
+              child: const Icon(Icons.more_horiz),
+            ),
+          ],
+        ),
+        const SizedBox(height: 30),
+        Text(
+          //sqlite
+          marker.title,
+          style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        InkWell(
+          onTap: () {},
+          child: Row(
+            children: [
+              const Icon(Icons.location_searching),
+              const SizedBox(width: 10),
+              //sqlite
+              Text(marker.place!),
+            ],
+          ),
+        )
+      ],
+    ),
+  );
+}
+
+Widget _body(context, List<MemoryModel> selectedMarkerMemorys) {
+  debugPrint('${selectedMarkerMemorys.length}');
+  var itemCount = selectedMarkerMemorys.length;
+
+  return Expanded(
+    child: itemCount > 0
+        ? ListView.builder(
+            itemCount: itemCount,
+            itemBuilder: (context, index) {
+              var currentIdxMemory =
+                  selectedMarkerMemorys[index]; //현제 타일(index)의 메모리 Model 입니다.
+              var pictureList = Provider.of<SelectedMarkerProvider>(context)
+                  .searchPictures(currentIdxMemory
+                      .idx!); //현제 추억에 해당하는 Picutre 을 담고 있는 PictureList 입니다.
+
+              //해당 추억에 포함되어 있는 picture가져오기 + 각각 추억들의 memory_idx에 해당하는 사진을 골라줘서 출력해주기
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
+                    // 일자 + (수정 및 삭제)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _header(context),
-                        const SizedBox(height: 15),
-                        const Divider(thickness: 1, color: Colors.grey),
-                        //아아..코드 더러워 지기 시작한다..
-                        _body(context),
+                        Text(
+                          //sqlite
+                          currentIdxMemory.datetime,
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            //여기가 추억쪽
+                            _showDialogMemory(context, index);
+                          },
+                          child: const Icon(Icons.more_vert),
+                        ),
                       ],
                     ),
-                    Positioned(
-                        right: 16.0,
-                        bottom: 16.0,
-                        child: FloatingActionButton(
-                          backgroundColor: Colors.white,
-                          onPressed: () async {
-                            SqlMemoryCRUD().insert(
-                              '',
-                              getToday(),
-                              Provider.of<MarkerSelected>(context,listen:false).marker_idx,
-                            );
-                            debugPrint("!@");
-                            List<Map> aa = await SqlMemoryCRUD().MemoryDataMap(Provider.of<MarkerSelected>(context,listen:false).marker_idx);
-                            debugPrint(aa.toString());
-                            int len = aa.length;
-                            Provider.of<MarkerSelected>(context,listen:false).setMemoryIdx(aa[len-1]['idx']);
-                            debugPrint("@#");
-                            debugPrint(Provider.of<MarkerSelected>(context,listen:false).memory_idx.toString());
-                            Provider.of<MarkerSelected>(context,listen:false).setDateTime(
-                                (await SqlMemoryCRUD().MemoryDate(Provider.of<MarkerSelected>(context,listen:false).memory_idx))['datetime']
-                            );
-                            Navigator.push(context, MaterialPageRoute(
-                                builder: (context) => AddLocationScreen())).then((value) {
-                              bottomState((){
-                                bottomUpdate(context);
-                              });
-                            });
-                            //bottomBodyUpdate(context);
-                          },
-                          child: Image.asset(
-                            'assets/images/map_icon.png',
-                          ),
-                        )
-                    ),
-                  ]
-              ),
-            );
-          },
-        );
-      }
-    );
-  }
-  void bottomUpdate(context) async{
-    Provider.of<MarkerSelected>(context,listen:false).setPictureInformation(
-        await SqlPictureCRUD().loadPictureAll(Provider.of<MarkerSelected>(context,listen:false).marker_idx)
-    );
-    Provider.of<MarkerSelected>(context,listen:false).setMemoryInformation(
-        await SqlMemoryCRUD().MemoryDataMap(Provider.of<MarkerSelected>(context,listen:false).marker_idx)
-    );
-  }
-  Widget _header(context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                '추억 보기',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              InkWell(
-                onTap: () {
-                  //여기가 마커
-                  _showDialogMarker(context);
-                },
-                child: const Icon(Icons.more_horiz),
-              ),
-            ],
-          ),
-          const SizedBox(height: 30),
-          Text(
-            //sqlite
-            Provider.of<MarkerSelected>(context, listen:false).marker_name,
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          InkWell(
-            onTap: () {},
-            child: Row(
-              children: [
-                const Icon(Icons.location_searching),
-                const SizedBox(width: 10),
-                //sqlite
-                Text(Provider.of<MarkerSelected>(context, listen:false).place),
-              ],
-            ),
+                    const SizedBox(height: 15),
+
+                    /// 갤러리 사진
+
+                    showImage(context, pictureList),
+                    const SizedBox(height: 15),
+                    Text(currentIdxMemory.contents),
+                  ],
+                ),
+              );
+            },
           )
-        ],
-      ),
-    );
-  }
-  Widget _body(context) {
-    var itemCount = Provider.of<MarkerSelected>(context, listen:false).memoryInformation.length;
-    debugPrint(itemCount.toString());
-    debugPrint("또 안돼?");
-    //debugPrint(Provider.of<MarkerSelected>(context, listen:false).memoryInformation[0]['idx'].toString());
-    List<String> imagelist = [];
-    return Expanded(
-      child: itemCount > 0
-          ? ListView.builder(
-              itemCount: itemCount,
+        : const Center(
+            child: Text(
+              '아직 이곳엔 추억이 없어요.',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+  );
+}
+
+Widget showImage(context, List<PictureModel> pictureList) {
+  return pictureList.isNotEmpty
+      ? SizedBox(
+          height: 100,
+          child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: pictureList.length,
               itemBuilder: (context, index) {
-                //해당 추억에 포함되어 있는 picture가져오기 + 각각 추억들의 memory_idx에 해당하는 사진을 골라줘서 출력해주기
-                List<String> aaa =[];
-                List<Map> sss = Provider.of<MarkerSelected>(context, listen:false).pictureInformation;
-                //debugPrint("야 이거다 2");
-                for(int i=0;i<sss.length;i++)
-                {
-                  if(sss[i]['memory_idx'] == Provider.of<MarkerSelected>(context, listen:false).memoryInformation[index]['idx'])
-                  {
-                    aaa.add(sss[i]['picture']);
-                  }
-                }
-                //debugPrint("야 이거다? 이거 뭐냐?");
-                aaa.isNotEmpty?
-                  imagelist = aaa : imagelist = [];
-                //ㅓdebugPrint(imagelist.isEmpty.toString());
-                //여기까지 picture전처리 작업.
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 일자 + (수정 및 삭제)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            //sqlite
-                            Provider.of<MarkerSelected>(context, listen:false).memoryInformation[index]['datetime'],
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              //여기가 추억쪽
-                              _showDialogMemory(context,index).then((value) {bottomUpdate(context);});
-                            },
-                            child: const Icon(Icons.more_vert),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 15),
-                      // 갤러리 사진
-                      imagelist.isNotEmpty ?
-                      SizedBox(
-                          height: 100,
-                          child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: imagelist.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                    width: 100,
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.grey)),
-                                    child: Utility.imageFromBase64String(imagelist[index]));
-                              }
-                          ),
-                        ) : const SizedBox(),
-                      const SizedBox(height: 15),
-                      Text(
-                        //sqlite
-                        Provider.of<MarkerSelected>(context, listen:false).memoryInformation[index]['contents']??'',
-                      ),
-                    ],
-                  ),
-                );
+                return Container(
+                    width: 100,
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration:
+                        BoxDecoration(border: Border.all(color: Colors.grey)),
+                    child: Utility.imageFromBase64String(
+                        pictureList[index].picture!));
+              }),
+        )
+      : const SizedBox();
+}
+
+Future _showDialogMarker(context) {
+  var selectedMarkerProvider =
+      Provider.of<SelectedMarkerProvider>(context, listen: false);
+
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        alignment: Alignment.center,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InkWell(
+              onTap: () {
+                EditMarker(context);
               },
-            )
-          : const Center(
-              child: Text(
-                '아직 이곳엔 추억이 없어요.',
-                style: TextStyle(color: Colors.grey),
+              child: const Row(
+                children: [
+                  Icon(Icons.edit),
+                  SizedBox(width: 10),
+                  Text('수정하기'),
+                ],
               ),
             ),
-    );
+            const SizedBox(height: 10),
+            InkWell(
+              onTap: () {
+                //마커를 정말 삭제하시겠습니까?
+
+                if (selectedMarkerProvider.memories.isNotEmpty) {
+                  //마커의 추억들이 모두 삭제가 되지 않았습니다. 모든 추억들을 삭제해주시고 마커를 삭제해주세요
+                  showAlertDialog(context, '삭제 실패',
+                      '마커의 추억들이 모두 삭제가 되지 않았습니다. 모든 추억들을 삭제해주시고 마커를 삭제해주세요');
+                } else {
+                  //마커가 삭제되었습니다.
+                  var deletedMarkerId = selectedMarkerProvider.marker!.id;
+                  //Provider.of<MarkerProvider>(context)
+                  //  .deleteMarker(deletedMarkerId!);
+                  context.read<MarkerProvider>().deleteMarker(deletedMarkerId!);
+                  selectedMarkerProvider.initSelectedMarker();
+
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+
+                  showAlertDialog(context, '삭제 성공', '마커가 삭제되었습니다.');
+                }
+              },
+              child: const Row(
+                children: [
+                  Icon(Icons.delete_outline),
+                  SizedBox(width: 10),
+                  Text('삭제하기'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Future _showDialogMemory(context, int index) {
+  var memory = Provider.of<SelectedMarkerProvider>(context, listen: false)
+      .memories[index];
+
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        alignment: Alignment.center,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InkWell(
+              onTap: () {
+                context.read<SelectedMemoryProvider>().setData(memory);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        //selectedMemories
+                        builder: (context) => const EditMemoryScreen(
+                            sheetType: BottomSheetType.showBottom)));
+              },
+              child: const Row(
+                children: [
+                  Icon(Icons.edit),
+                  SizedBox(width: 10),
+                  Text('수정하기'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            InkWell(
+              onTap: () async {
+                debugPrint('삭제됩니다');
+                await deleteMemory(context, memory);
+
+                //사진도 지우기
+              },
+              child: const Row(
+                children: [
+                  Icon(Icons.delete_outline),
+                  SizedBox(width: 10),
+                  Text('삭제하기'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Future<void> deleteMemory(context, MemoryModel memory) async {
+  //var pictureList =
+  // context.read<SelectedMarkerProvider>().searchPictures(memory.idx!);
+  var selectedMarkerProvider =
+      Provider.of<SelectedMarkerProvider>(context, listen: false);
+  var pictureList = selectedMarkerProvider.searchPictures(memory.idx!);
+  await Future.delayed(const Duration(milliseconds: 100));
+  for (var i = 0; i < pictureList.length; i++) {
+    await Provider.of<PictureProvider>(context, listen: false)
+        .deletePicutre(pictureList[i].idx!);
+    await Future.delayed(const Duration(milliseconds: 10));
   }
-  Future _showDialogMarker(context) {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          alignment: Alignment.center,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              InkWell(
-                onTap: () {
-                  //마커 수정은 아직..구현이..
-                  Navigator.of(context).pop();
-                },
-                child: const Row(
-                  children: [
-                    Icon(Icons.edit),
-                    SizedBox(width: 10),
-                    Text('수정하기'),
-                    //??
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              InkWell(
-                onTap: () {
-                  SqlMarkerCRUD().deleteMarker(Provider.of<MarkerSelected>(context,listen:false).lati,Provider.of<MarkerSelected>(context,listen:false).longi);
-                  SqlMemoryCRUD().deleteMarkerMemory(Provider.of<MarkerSelected>(context,listen:false).marker_idx);
-                  SqlPictureCRUD().deleteMarkerPicture(Provider.of<MarkerSelected>(context,listen:false).marker_idx);
-                  Navigator.popUntil(
-                      context, ModalRoute.withName(RouteName.home));
-                },
-                child: const Row(
-                  children: [
-                    Icon(Icons.delete_outline),
-                    SizedBox(width: 10),
-                    Text('삭제하기'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-  Future _showDialogMemory(context,int index) {
-    Map infor = Provider.of<MarkerSelected>(context,listen:false).memoryInformation[index];
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          alignment: Alignment.center,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              InkWell(
-                onTap: () {
-                  Provider.of<MarkerSelected>(context,listen:false).setDateTime(infor['datetime']);
-                  Provider.of<MarkerSelected>(context,listen:false).setMemoryIdx(infor['idx']);
-                  //Provider.of<MarkerSelected>(context,listen:false)
-                  debugPrint(Provider.of<MarkerSelected>(context,listen:false).memory_idx.toString());
-                  //여기 손대야함.
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>EditLocationScreen()));
-                },
-                child: const Row(
-                  children: [
-                    Icon(Icons.edit),
-                    SizedBox(width: 10),
-                    Text('수정하기'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              InkWell(
-                onTap: () async {
-                  SqlMemoryCRUD().deleteMemory(infor['idx']);
-                  SqlPictureCRUD().deleteMemoryPicture(infor['idx']);
-                  Navigator.popUntil(
-                      context,ModalRoute.withName(RouteName.home)
-                  );
-                  Provider.of<MarkerSelected>(context,listen:false).setPictureInformation(
-                      await SqlPictureCRUD().loadPictureAll(Provider.of<MarkerSelected>(context,listen:false).marker_idx)
-                  );
-                  Provider.of<MarkerSelected>(context,listen:false).setMemoryInformation(
-                  await SqlMemoryCRUD().MemoryDataMap(Provider.of<MarkerSelected>(context,listen:false).marker_idx)
-                  );
-                  showBottom(context);
-                },
-                child: const Row(
-                  children: [
-                    Icon(Icons.delete_outline),
-                    SizedBox(width: 10),
-                    Text('삭제하기'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  await Provider.of<MemoryProvider>(context, listen: false)
+      .deleteMemory(memory.idx!);
+  Navigator.of(context).pop();
+  Navigator.of(context).pop();
+  await Future.delayed(const Duration(milliseconds: 10));
+
+  await showBottom(selectedMarkerProvider.marker!.id!, context);
+}

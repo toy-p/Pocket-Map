@@ -18,20 +18,20 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.amber[100],
       ),
-      body: Stack(
+      body: const Stack(
         children: [
-          map(context),
-          const AddressSearch(),
+          BuildkakaoMap(),
+          AddressSearch(),
         ],
       ),
       floatingActionButton: Stack(
         children: [
-          floatingButtonCustom(
-            const Icon(Icons.gps_fixed_rounded),
-            0.0,
-            context,
-            'getLocation',
-          ),
+          // floatingButtonCustom(
+          //   const Icon(Icons.gps_fixed_rounded),
+          //   0.0,
+          //   context,
+          //   'getLocation',
+          // ),
           floatingButtonCustom(
             const Icon(Icons.add_location_alt_outlined),
             0.2,
@@ -44,6 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
             context,
             'showMemory',
           ),
+          floatingButtonCustom(const Icon(Icons.manage_search_sharp), 0.6,
+              context, 'showmarkerlist'),
         ],
       ),
     );
@@ -57,13 +59,15 @@ class _HomeScreenState extends State<HomeScreen> {
         heroTag: heroTag,
         onPressed: () {
           if (val == 0.0) {
-            getLocation(context);
+            //moveCurrentLocation(context);
           } else if (val == 0.2) {
             dialogBuilder(context);
             // showBottom(context); // 해당 위치 마커 추억 보기
           } else if (val == 0.4) {
             bottomSheetBuilder(context);
             // showBottom(context); // 해당 위치 마커 추억 보기
+          } else if (val == 0.6) {
+            Navigator.pushNamed(context, '/markerListScreen');
           }
         },
         backgroundColor: Colors.white,

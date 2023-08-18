@@ -1,21 +1,29 @@
-class Memory {
-  Memory(
-      {this.idx,
-        this.contents,
-        required this.dateTime,
-        required this.marker_idx,
-      });
+class MemoryModel {
+  factory MemoryModel.fromMap(Map map) {
+    return MemoryModel(
+      idx: map['idx'],
+      contents: map['contents'],
+      datetime: map['datetime'],
+      marker_idx: map['marker_idx'],
+    );
+  }
+  MemoryModel({
+    this.idx,
+    required this.contents,
+    required this.datetime,
+    required this.marker_idx,
+  });
 
   int? idx;
-  String? contents;
-  String dateTime;
+  String contents = '';
+  String datetime;
   int? marker_idx;
 
   Map<String, dynamic> toMap() {
     return {
       'idx': idx,
       'contents': contents,
-      'dateTime': dateTime,
+      'datetime': datetime,
       'marker_idx': marker_idx,
     };
   }
