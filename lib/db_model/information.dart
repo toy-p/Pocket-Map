@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 
 //마커 선택되었을 때, 필요한 모든 정보들
 class MarkerSelected with ChangeNotifier{

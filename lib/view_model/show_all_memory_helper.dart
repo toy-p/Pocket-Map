@@ -24,7 +24,6 @@ class ShowAllMemoryHelper {
 
       images.add(image);
     }
-
     return images;
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:kakao_map_plugin/kakao_map_plugin.dart';
 import 'package:my_tiny_map/config/route.dart';
 import 'package:my_tiny_map/db_repository/sql_database.dart';
-import 'package:my_tiny_map/design/theme.dart';
 import 'package:my_tiny_map/view_model/marker_provider.dart';
 import 'package:my_tiny_map/view_model/memory_provider.dart';
 import 'package:my_tiny_map/view_model/picture_provider.dart';
@@ -34,7 +33,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       routes: nameRoutes,
-      theme: AppTheme.mainThemeDate,
     );
   }
 }
