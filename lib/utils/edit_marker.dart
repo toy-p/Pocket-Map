@@ -8,33 +8,69 @@ import 'package:my_tiny_map/datas/models/kakaomap_model.dart';
 import 'package:my_tiny_map/db_model/marker_model.dart';
 import 'package:my_tiny_map/utils/image_utility/utility.dart';
 import 'package:my_tiny_map/utils/kakao.dart';
+import 'package:my_tiny_map/utils/show_memory.dart';
 import 'package:my_tiny_map/view_model/marker_provider.dart';
+import 'package:my_tiny_map/view_model/selectedMarker_provider.dart';
 import 'package:provider/provider.dart';
 
-// 마커 추가
-Future<void> dialogBuilder(BuildContext context) {
+Future<void> EditMarker(BuildContext context) async {
+  var markerProvider = context.read<SelectedMarkerProvider>();
+  var marker = markerProvider.marker; // 선택된 마커
+  print(marker!.toMap());
   return showDialog<void>(
     context: context,
     builder: (context) {
-      return const CustomDialog();
+      return CustomDialog(marker: marker);
     },
   );
 }
 
 class CustomDialog extends StatefulWidget {
-  const CustomDialog({super.key});
+  const CustomDialog({super.key, required this.marker});
+  final MarkerModel marker;
 
   @override
   State<CustomDialog> createState() => _CustomDialogState();
 }
 
 class _CustomDialogState extends State<CustomDialog> {
+  @override
+  void initState() {
+    super.initState();
+
+    setData(widget.marker);
+  }
+
+  ///처음 원래 마커 정보를 불러오는 함수
+  void setData(MarkerModel markerModel) {
+    //마커 미리보기 설정
+    if (markerModel.picture != null) {
+      var picutre = markerModel.picture;
+      initImage = Utility.imageFromBase64String(picutre!);
+    } else {
+      selectIcon =
+          IconData(markerModel.icon_codepoint!, fontFamily: 'MaterialIcons');
+    }
+
+    //마커의 contents
+    _TitleTextEditController.text = markerModel.title;
+
+    //marker 위치
+    getL.roadAddress = markerModel.place!;
+    getL.latitude = markerModel.lati.toString();
+    getL.longitude = markerModel.longi.toString();
+  }
+
+//마커의 정보들
+
   GetLocation getL = GetLocation();
-  late Marker marker;
-  Set<Marker> markers = {};
+
+//마커 미리보기
   final ImagePicker _picker = ImagePicker();
+  Image? initImage;
   XFile? _pickedImage;
 
+  String title = '';
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
   final TextEditingController _TitleTextEditController =
       TextEditingController();
@@ -52,6 +88,7 @@ class _CustomDialogState extends State<CustomDialog> {
     setState(() {
       _pickedImage = image;
       selectIcon = null;
+      initImage = null;
     });
   }
 
@@ -98,6 +135,7 @@ class _CustomDialogState extends State<CustomDialog> {
                           setState(() {
                             selectIcon = iconList[i];
                             _pickedImage = null;
+                            initImage = null;
                           });
                         },
                         iconSize: 20,
@@ -124,7 +162,22 @@ class _CustomDialogState extends State<CustomDialog> {
           const SizedBox(
             height: 30,
           ),
-          if (_pickedImage == null)
+          if (initImage != null)
+            Positioned.fill(child: initImage!)
+          else if (_pickedImage != null)
+            Center(
+                child: SizedBox(
+              width: 100,
+              height: 100,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(35.0),
+                child: Image.file(
+                  File(_pickedImage!.path),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ))
+          else if (selectIcon != null)
             Center(
                 child: Container(
               width: 100,
@@ -147,19 +200,6 @@ class _CustomDialogState extends State<CustomDialog> {
                     selectIcon,
                     size: 30,
                   )),
-            ))
-          else
-            Center(
-                child: SizedBox(
-              width: 100,
-              height: 100,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(35.0),
-                child: Image.file(
-                  File(_pickedImage!.path),
-                  fit: BoxFit.cover,
-                ),
-              ),
             ))
         ],
       ),
@@ -215,18 +255,21 @@ class _CustomDialogState extends State<CustomDialog> {
             splashRadius: 15,
           ),
           const Text(
-            '마커 추가',
+            '수정',
             style: TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.black, fontSize: 20),
           ),
           TextButton(
               onPressed: () {
-                _saveMarkerData(context);
+                _EditMarkerData(context);
                 Navigator.pop(context);
-                moveLocation();
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Future.delayed(const Duration(milliseconds: 100));
+                showBottom(widget.marker.id!, context);
               },
               child: const Text(
-                '저장',
+                '수정하기',
                 style: TextStyle(color: Colors.black),
               ))
         ],
@@ -320,23 +363,24 @@ class _CustomDialogState extends State<CustomDialog> {
     );
   }
 
-  Future<void> _saveMarkerData(context) async {
+  Future<void> _EditMarkerData(context) async {
     // Marker 객체를 생성하여 해당 필드 값들을 설정합니다.
     if (_TitleTextEditController.text.isEmpty ||
-        (selectIcon == null && _pickedImage == null) ||
+        (selectIcon == null && (_pickedImage != null || initImage != null)) ||
         getL.roadAddress == '-') {
     } else {
       int? selecticonCodepoint;
       String? picture;
       if (_pickedImage != null) {
         picture = Utility.base64String(await _pickedImage!.readAsBytes());
-      }
-      if (selectIcon == null) {
-        selecticonCodepoint = null;
-      } else {
+      } else if (selectIcon != null) {
         selecticonCodepoint = selectIcon!.codePoint;
+      } else if (initImage != null) {
+        picture = widget.marker.picture;
+      } else {
+        selecticonCodepoint = null;
       }
-      print('마커 추가할게여');
+      print('마커 수정할게여');
       var newMarker = MarkerModel(
         // 임의로 선택한 id 값 (데이터베이스에서 SQLITE_AUTOINCREMENT로 설정된 경우)
         title: _TitleTextEditController.text, // 제목
@@ -348,9 +392,14 @@ class _CustomDialogState extends State<CustomDialog> {
       );
 
       // sqflite 데이터베이스에 저장하는 함수 호출
+      var markerId = Provider.of<SelectedMarkerProvider>(context, listen: false)
+          .marker!
+          .id;
+      newMarker.id = markerId;
       await Provider.of<MarkerProvider>(context, listen: false)
-          .addMarker(newMarker);
-
+          .updateMarker(newMarker);
+      await Provider.of<SelectedMarkerProvider>(context, listen: false)
+          .fetchData();
       // 마커 정보를 불러온다.
 
       // 마커 맵에 불러온 마커를 추가한다.

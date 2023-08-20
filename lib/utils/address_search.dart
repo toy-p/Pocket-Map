@@ -4,8 +4,6 @@ import 'package:kpostal/kpostal.dart';
 import 'package:my_tiny_map/datas/models/kakaomap_model.dart';
 import 'package:my_tiny_map/utils/kakao.dart';
 
-import '../db_repository/sql_marker_CRUD.dart';
-
 class AddressSearch extends StatefulWidget {
   const AddressSearch({super.key});
 
@@ -26,8 +24,8 @@ class _AddressSearchState extends State<AddressSearch> {
       right: 15,
       child: GestureDetector(
         onTap: () async {
-          onTap();
-          moveLocation();
+          await onTap();
+          await moveLocation();
         },
         child: Container(
           decoration: BoxDecoration(
@@ -88,7 +86,7 @@ class _AddressSearchState extends State<AddressSearch> {
         builder: (_) => KpostalView(
           useLocalServer: true,
           localPort: 1024,
-          callback: (Kpostal result) {
+          callback: (result) {
             setState(() {
               getL.roadAddress = result.address;
               getL.latitude = result.latitude.toString();
@@ -118,12 +116,11 @@ class _AddressSearchState extends State<AddressSearch> {
         offsetX: 15,
         offsetY: 44,
         // markerImageSrc: 'https://w7.pngwing.com/pngs/96/889/png-transparent-marker-map-interesting-places-the-location-on-the-map-the-location-of-the-thumbnail.png',
-      );/*
+      ); /*
       double _a = double.parse(getL.init_latitude.toStringAsFixed(6));
       double _b = double.parse(getL.init_longitude.toStringAsFixed(6));
       SqlMarkerCRUD().insert(getL.roadAddress,_a,_b);*/
       markers.add(marker);
-
       mapController.addMarker(markers: markers.toList());
     });
   }
