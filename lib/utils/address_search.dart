@@ -68,7 +68,7 @@ class _AddressSearchState extends State<AddressSearch> {
                             ),
                           )
                       else
-                          Provider.of<MarkerProvider>(context).currentMarker != null ?
+                        (Provider.of<MarkerProvider>(context).currentMarker != null && Provider.of<MarkerProvider>(context).currentMarker!.place != '-') ?
                           Text(
                             Provider.of<MarkerProvider>(context).currentMarker!.place.toString(),
                             style: TextStyle(

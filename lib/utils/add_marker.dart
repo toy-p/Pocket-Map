@@ -351,7 +351,7 @@ class _CustomDialogState extends State<CustomDialog> {
       await Provider.of<MarkerProvider>(context, listen: false)
           .addMarker(newMarker);
 
-      Provider.of<MarkerProvider>(context).updateCurrentMarker(newMarker);
+      Provider.of<MarkerProvider>(context, listen: false).updateCurrentMarker(newMarker);
 
       // 마커 정보를 불러온다.
 

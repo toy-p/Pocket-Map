@@ -16,6 +16,11 @@ class MarkerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void initCurrentMarker() {
+    currentMarker!.place = '-';
+    notifyListeners();
+  }
+
   Future<void> addMarker(MarkerModel marker) async {
     marker.id = await _sqlMarkerCRUD.markerModelInsert(marker);
     _markers.add(marker);
