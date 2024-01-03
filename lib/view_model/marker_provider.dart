@@ -9,6 +9,18 @@ class MarkerProvider extends ChangeNotifier {
 
   List<MarkerModel> get markers => _markers;
 
+  MarkerModel? currentMarker;
+
+  void updateCurrentMarker(MarkerModel marker) {
+    currentMarker = marker;
+    notifyListeners();
+  }
+
+  void initCurrentMarker() {
+    currentMarker!.place = '-';
+    notifyListeners();
+  }
+
   Future<void> addMarker(MarkerModel marker) async {
     marker.id = await _sqlMarkerCRUD.markerModelInsert(marker);
     _markers.add(marker);

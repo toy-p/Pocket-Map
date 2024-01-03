@@ -263,6 +263,7 @@ Future _showDialogMarker(context) {
                   //  .deleteMarker(deletedMarkerId!);
                   context.read<MarkerProvider>().deleteMarker(deletedMarkerId!);
                   selectedMarkerProvider.initSelectedMarker();
+                  context.read<MarkerProvider>().initCurrentMarker();
 
                   Navigator.pop(context);
                   Navigator.pop(context);
