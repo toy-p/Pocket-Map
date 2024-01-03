@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //DB 저장 되어있는 정보들을 앱 시작전에 불러오기
     context.read<MarkerProvider>().fetchMarkers();
     context.read<MemoryProvider>().fetchMemory();
     context.read<PictureProvider>().fetchPicutre();

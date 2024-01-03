@@ -32,6 +32,8 @@ class _MarkerListScreenState extends State<MarkerListScreen> {
               onTap: () {
                 var latLng = LatLng(markers[index].lati, markers[index].longi);
                 moveToLatLng(latLng);
+                //해당 마커를 눌렀을 때 가리키고 있는 marker를 변경해줌.
+                Provider.of<MarkerProvider>(context, listen: false).updateCurrentMarker(markers[index]);
                 Navigator.pop(context);
                 Future.delayed(const Duration(milliseconds: 120));
               },

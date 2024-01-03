@@ -60,7 +60,8 @@ class _BuildkakaoMapState extends State<BuildkakaoMap> {
           markerId: markerModel.id.toString(),
           latLng: LatLng(markerModel.lati, markerModel.longi),
           width: 24,
-          height: 36));
+          height: 36)
+      );
     }
 
     Future.delayed(const Duration(milliseconds: 200));
